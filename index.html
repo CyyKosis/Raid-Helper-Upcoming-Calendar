@@ -63,7 +63,7 @@
     <div class="card" id="card">
 
       <div id="cardHeader">
-        <span id="title">NW Calendar</span>
+        <span id="title" class="fs-2">NW Calendar</span>
         <div id="signups">
         </div>
       </div>
@@ -103,7 +103,8 @@
           }
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          const tomorrow = today.setDate(today.getDate() + 1);
+          const tomorrow = new Date(today);
+          tomorrow.setDate(today.getDate() + 1);
           const data = await response.json();
           let inner = "";
           data.forEach(element => {
