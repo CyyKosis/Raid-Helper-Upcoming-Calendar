@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Calendar Ring — Adaptive</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
 
   :root{
     --bg: #000000;
@@ -25,7 +25,7 @@
     padding: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: 'Saira', ui-sans-serif, system-ui;
+    font-family: 'Jost', ui-sans-serif, system-ui;
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -90,39 +90,11 @@
 <body>
   <div class="wrap">
     <div class="card" id="card" role="img" aria-label="Calendar ring showing today's position in the year and progress of the current day">
-      <svg viewBox="-100 -100 200 200" aria-hidden="true">
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="1.8" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
 
-        <!-- Base rings -->
-        <circle cx="0" cy="0" r="74" fill="none" stroke="var(--ring-base)" stroke-width="12" />
-        <g id="ticks"></g>
-
-        <!-- Year progress arc -->
-        <path id="yearProgress" fill="none" stroke="var(--progress)" stroke-linecap="round" stroke-width="6" filter="url(#glow)" />
-
-        <!-- Today marker -->
-        <circle id="todayDot" r="2.8" fill="var(--today)" filter="url(#glow)" />
-
-        <!-- Day progress inner ring -->
-        <path id="dayProgress" fill="none" stroke="var(--day-progress)" stroke-linecap="round" stroke-width="3.5" filter="url(#glow)" />
-
-        <!-- Inner guide ring -->
-        <circle cx="0" cy="0" r="52" fill="none" stroke="var(--ring-base)" stroke-width="2" />
-      </svg>
-
-      <div class="center-text" aria-live="polite">
-        <div>
-          <div class="date-big" id="dateBig">—</div>
-          <div class="date-sub" id="dateSub">—</div>
-        </div>
+      <div id="cardHeader">
+          <span id="title">NW Calendar</span>
+          <div id="signups">
+          </div>
       </div>
 
       <div class="legend">• Year progress • Day progress — press <kbd>H</kbd> for high-contrast</div>
@@ -131,61 +103,13 @@
 
 <script>
 (function(){
-  const card=document.getElementById('card');
-  const ticksG=document.getElementById('ticks');
-  const yearProgress=document.getElementById('yearProgress');
-  const dayProgress=document.getElementById('dayProgress');
-  const todayDot=document.getElementById('todayDot');
-  const dateBig=document.getElementById('dateBig');
-  const dateSub=document.getElementById('dateSub');
-
-  const R_MAJOR=74, R_TICK_INNER=66.5, R_TICK_OUTER=74, R_TICK_MONTH=62;
-
-  function isLeap(y){return(y%4===0&&y%100!==0)||y%400===0;}
-  function daysInYear(y){return isLeap(y)?366:365;}
-  function doy(date){return Math.floor((date - new Date(date.getFullYear(),0,0))/86400000);}
-  function fractionOfDay(date){return (date.getHours()*3600+date.getMinutes()*60+date.getSeconds()+date.getMilliseconds()/1000)/86400;}
-  function polarToCartesian(cx,cy,r,a){const rad=(a-90)*Math.PI/180;return{x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};}
-  function describeArc(r,start,end){const large=(end-start)%360>180?1:0;const s=polarToCartesian(0,0,r,end),e=polarToCartesian(0,0,r,start);return`M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 0 ${e.x} ${e.y}`;}
-
-  function buildTicks(year){
-    const total=daysInYear(year);
-    const monthStarts=new Set([...Array(12).keys()].map(m=>doy(new Date(year,m,1))));
-    const frag=document.createDocumentFragment();
-    for(let d=1;d<=total;d++){
-      const angle=(d/total)*360;
-      const isMonth=monthStarts.has(d);
-      const inner=isMonth?R_TICK_MONTH:R_TICK_INNER;
-      const p1=polarToCartesian(0,0,inner,angle);
-      const p2=polarToCartesian(0,0,R_TICK_OUTER,angle);
-      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1',p1.x);line.setAttribute('y1',p1.y);
-      line.setAttribute('x2',p2.x);line.setAttribute('y2',p2.y);
-      line.setAttribute('stroke',isMonth?'var(--ring-tick-strong)':'var(--ring-tick)');
-      line.setAttribute('stroke-width',isMonth?'1.2':'0.8');
-      frag.appendChild(line);
-    }
-    ticksG.innerHTML='';ticksG.appendChild(frag);
-  }
+  const title=document.getElementById('title');
+  const signups=document.getElementById('signups');
 
   function update(){
     const now=new Date();
-    const y=now.getFullYear();
-    const total=daysInYear(y);
-    const dayOfYear=doy(now);
-    const fracDay=fractionOfDay(now);
-    const yearDeg=((dayOfYear-1+fracDay)/total)*360;
-    yearProgress.setAttribute('d',describeArc(69,0.01,yearDeg));
-    const todayAngle=((dayOfYear-0.5)/total)*360;
-    const pos=polarToCartesian(0,0,69,todayAngle);
-    todayDot.setAttribute('cx',pos.x);todayDot.setAttribute('cy',pos.y);
-    dayProgress.setAttribute('d',describeArc(52,0.01,fracDay*360));
-    const wd=now.toLocaleDateString(undefined,{weekday:'long'});
-    const mo=now.toLocaleDateString(undefined,{month:'long'});
-    const dd=now.toLocaleDateString(undefined,{day:'numeric'});
-    const pct=((dayOfYear-1+fracDay)/total*100).toFixed(1);
-    dateBig.textContent=`${wd}, ${mo} ${dd}, ${y}`;
-    dateSub.textContent=`${dayOfYear}/${total} • ${pct}% of year • ${Math.round(fracDay*100)}% of today`;
+    const today=now.getMonth() + "/" + now.getDate();
+    title.innerHTML = "NW Calendar " + today;
     requestAnimationFrame(update);
   }
 
