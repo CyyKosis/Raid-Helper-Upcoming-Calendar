@@ -96,8 +96,6 @@
           <div id="signups">
           </div>
       </div>
-
-      <div class="legend">• Year progress • Day progress — press <kbd>H</kbd> for high-contrast</div>
     </div>
   </div>
 
@@ -113,11 +111,6 @@
     requestAnimationFrame(update);
   }
 
-  document.addEventListener('keydown',e=>{
-    if(e.key.toLowerCase()==='h')document.body.classList.toggle('high-contrast');
-  });
-
-  buildTicks(new Date().getFullYear());
   update();
 })();
 </script>
