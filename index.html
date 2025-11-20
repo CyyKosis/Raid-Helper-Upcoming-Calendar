@@ -148,10 +148,12 @@
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
           const data = await response.json();
           let inner = "";
           data.forEach(element => {
-            if (element.startTime > Math.floor(Date.setHours(0, 0, 0, 0) / 1000)) {
+            if (element.startTime > Math.floor(today / 1000)) {
               if (element.signups[0].className == 'Absence')
                 inner += "<div class=\"border-start border-danger border-5\">";
               else if (element.signups[0].className == 'Tentative')
