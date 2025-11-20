@@ -133,7 +133,7 @@
         const today = now.getMonth() + "/" + now.getDate();
         title.innerHTML = "NW Calendar " + today;
 
-        fetchData();
+        fetchData(signups);
       }
 
       update();
@@ -149,7 +149,21 @@
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.json();
-          console.log(data); // Process the fetched data
+          let inner = "";
+          data.forEach(element => {
+            if (element.startTime > Math.floor(Date.today() / 1000))
+            {
+              if (element.signups[0].className == 'Absence')
+                inner += "<div class=\"border-start border-danger border-5\">";
+              else if (element.signups[0].className == 'Tentative')
+                inner += "<div class=\"border-start border-warning border-5\">";
+              else
+                inner += "<div class=\"border-start border-success border-5\">";
+
+              inner += "<p class=\"fs-3\">" + element.title + "</p></div>";
+            } // Process the fetched data
+          });
+          signups.innerHTML = inner;
         } catch (error) {
           console.error('Error fetching data:', error); // Handle any errors
         }
